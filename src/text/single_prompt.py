@@ -75,7 +75,7 @@ class SinglePromptAgent:
             result = ""
         return result
     
-    def run(self,extract_response=True,**args):
+    def run(self,extract_response=False,**args):
         agent_response = self.chain.run(
             **args
         )

@@ -3,20 +3,7 @@ from src.text.single_prompt import SinglePromptAgent
 from src.images.stability import ImageGenerator
 from src.images.image_descriptor import PostImageDescriptor
 from src.utils.create_file import create_file
-
-def colored_print(text:str, color:str='red'):
-    color_dict = {
-        'red': '\033[91m',
-        'green': '\033[92m',
-        'yellow': '\033[93m',
-        'blue': '\033[94m',
-        'magenta': '\033[95m',
-        'cyan': '\033[96m',
-        'white': '\033[97m',
-        'black': '\033[30m',
-        'reset': '\033[0m'
-    }
-    print(f'{color_dict[color]}{text}{color_dict["reset"]}')
+from src.utils.colored_print import colored_print
 
 
 class PostAgent:
