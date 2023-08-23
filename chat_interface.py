@@ -2,6 +2,9 @@ import random
 from src.text.single_prompt import SinglePromptAgent
 from src.utils.colored_print import colored_print
 from src.utils.create_file import create_file
+from langchain.callbacks import get_openai_callback
+
+
 def chat_interface():
         
         explanation = '''
@@ -19,22 +22,25 @@ def chat_interface():
         summary = 'Summary\n'
 
         while True:
-            last_messages = ''
-            user_message = input("Your message: ")
-            if user_message == 'get_summary()':
-                print(summary)
-                continue
-            
-            colored_print(user_message, 'blue')
-            last_messages += (f'{name}: {user_message}')
-            bot_message = generate_ai_answer(user_message, summary)
-            last_messages += f'Assistant: {bot_message}'
-            colored_print(bot_message)
-
-            if 'export_txt()' in user_message:
-                create_file(filename=generate_random_phrase() + '.txt', content=bot_message)
-            summary += summarize_conversation(summary=summary, last_messages=last_messages)
+            with get_openai_callback() as callback:
+                last_messages = ''
+                user_message = input("Your message: ")
+                if user_message == 'get_summary()':
+                    print(summary)
+                    continue
                 
+                colored_print(user_message, 'blue')
+                last_messages += (f'{name}: {user_message}')
+                bot_message = generate_ai_answer(user_message, summary)
+                last_messages += f'Assistant: {bot_message}'
+                colored_print(bot_message)
+
+                if 'export_txt()' in user_message:
+                    create_file(filename=generate_random_phrase() + '.txt', content=bot_message)
+                summary += summarize_conversation(summary=summary, last_messages=last_messages)
+                    
+                print(callback.total_cost)
+                print(callback.total_tokens)
         
 
 def generate_ai_answer(message:str, summary:str):
@@ -47,7 +53,6 @@ def generate_ai_answer(message:str, summary:str):
     This is the user message:
     {message}
 
-    Always give your answer in markdown format
     '''
     agent = SinglePromptAgent(template=_template)
 

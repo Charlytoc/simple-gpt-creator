@@ -52,13 +52,10 @@ rules = '''
         3. Invite your audience to leave their opinions on the comments section.
 '''
 
-social_network = '''
-
-'''
+social_network = "LinkedIn"
 def main():
 
     manager = PostAgent()
-
     post = manager.run(post_idea=idea_to_write_about, social_network=social_network, rules=rules)
 
     colored_print(text=post)

@@ -1,7 +1,11 @@
+import os
 import base64
 import requests
+from dotenv import load_dotenv
 
+load_dotenv()
 
+STABILITY_KEY = os.environ.get('STABILITY_KEY')
 import os
 
 class ImageGenerator:
@@ -11,7 +15,7 @@ class ImageGenerator:
       body = {
         "width": 1024,
         "height": 1024,
-        "steps": 50,
+        "steps": 40,
         "seed": 0,
         "cfg_scale": 7,
         "samples": 1,
@@ -27,7 +31,7 @@ class ImageGenerator:
       headers = {
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "Authorization": "Bearer sk-fewmPTk2ZdxnBQvZm2ymWwXMKhqsmUQ1aUcgDhMIiXMG6pFI",
+        "Authorization": f"Bearer {STABILITY_KEY}",
       }
 
       response = requests.post(

@@ -2,6 +2,7 @@
 import argparse
 
 from langchain.chat_models import ChatOpenAI
+
 from langchain import LLMChain
 from langchain.prompts.chat import (
     ChatPromptTemplate,
@@ -17,29 +18,30 @@ load_dotenv()
 
 class SinglePromptAgent:
     def __init__(self,
-                temperature: int = 0, 
+                temperature: int = 0.5, 
                 openai_api_key: str = '',
                 template: str = 
                 '''
-                You objective is: {objective}
-                
-                Comments between `` are to help you understand your task
-                Your answer must have the following structure
-                _start_ 
-                {response_structure}
-                _end_
-                The _start_ and _end_ tags are mandatory. 
-                Use this context: {context} to give your answer
+                Your are an useful assistant
+
+                User message: {user_message}
                 ''',
                 model: str= 'gpt-3.5-turbo'):
         self.system_template = template
         # self.human_template = '{letter_to_format}'
         # The temperature parameter controls the randomness of the model's output, with a lower temperature resulting in more deterministic output.
         self.chat = ChatOpenAI(temperature=temperature, model=model)
+
+
+
+        # You can use the SystemMessagePromptTemplate.from_template to transform a single text
+        # into a prompt with variables
         self.system_message_prompt = SystemMessagePromptTemplate.from_template(self.system_template)
+
         # self.user_message_prompt = HumanMessagePromptTemplate.from_template(self.human_template)
         self.start_tag = "_start_"
         self.end_tag = "_end_"
+
 
         # Combine the system and human prompts into a single chat prompt.
         # Availiable schemas are:
@@ -51,21 +53,11 @@ class SinglePromptAgent:
             # [self.system_message_prompt, self.user_message_prompt]
             [self.system_message_prompt]
         )
+
+        
         # Create an instance of LLMChain
         self.chain = LLMChain(llm=self.chat, prompt=self.chat_prompt)
 
-    # def _process_correct_answer(self, answer):
-    #     print("answer: ", answer)
-
-    # def _process_incorrect_answer(self, answer):
-    #     # print_in_red(f'Incorrect answer: {answer}')
-    #     print("incorrect answer")
-
-    # def _is_incomplete(self, response_text: str):
-    #     if '_incomplete_' in response_text:
-    #         return True
-    #     else: 
-    #         return False
 
     # This is the main entry point of the class
     def extract_response(self, text):
@@ -75,6 +67,7 @@ class SinglePromptAgent:
             result = ""
         return result
     
+
     def run(self,extract_response=False,**args):
         agent_response = self.chain.run(
             **args
