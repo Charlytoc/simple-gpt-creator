@@ -1,73 +1,92 @@
 
 from src.text.single_prompt import SinglePromptAgent
 from src.images.stability import ImageGenerator
-from src.images.image_descriptor import PostImageDescriptor
 from src.utils.create_file import create_file
 from src.utils.colored_print import colored_print
 
 
-class PostAgent:
-    '''
-    An agent capable of make a post in any social media given rules and specifications
-    '''
+def generate_post_about(about:str, number_of_words:int=300):
+    template = """You are an experienced copy writter.
+    You have a lot of information in a variety of field.
+    You need to write a post about: {about}
 
-    def _template(self):
-        #  This is a piece of your personal story: {backstory}.
-        template = '''
-        You are super cool content creator.
-        You usually make posts under this rules: {rules}
+    With an extension of {number_of_words} words.
 
-        Your task is to create awesome social media content for your audience. The content must be 
-        clear and engaging.
+    Use a kind and intellectual language.
+    Write the post in markdown format, the first h1 must be the title.
+    """
+    agent = SinglePromptAgent(template=template, 
+                              temperature=0.2, 
+                              model="gpt-3.5-turbo")
+    return agent.run(about=about, 
+                     number_of_words=number_of_words)
 
-        Make an awesome post for {social_network} about: {post_idea}
+def generate_image_description_for_post(post:str, 
+                                        style:str="digital art", 
+                                        number_of_words:int=100):
+    template = """As an experienced artist, you have created a lot of awesome
+    artistic works. You know how to write a good description of an art composition.
 
-        Keep in mind in the length of the post, follow the best practices for the platform.
-        
-        '''
-        return template
+    Write an image description of no more than {number_of_words} words for the next post:
     
-    def run(self, **args):
-        agent = SinglePromptAgent(template=self._template(), model='gpt-3.5-turbo')
-   
-        post = agent.run(
-            **args,
-            extract_response=False
-        )
-        return post
+    {post}
+    
+    The style of the image must be: {style}
 
-idea_to_write_about = 'How to write a good documentation'
+    Write just the image description as a composition using descriptive word.
+    Describe the scene, the characters if needed, colors, shapes and textures.
+    Use words to describe the scene but never more than the needed {number_of_words} words.
+    """
+    agent = SinglePromptAgent(template=template, 
+                              temperature=0.8, 
+                              model="gpt-3.5-turbo")
+    return agent.run(post=post, 
+                     style=style, 
+                     number_of_words=number_of_words)
 
-rules = '''
-        Follow the next rules to create an awesome post:
-        1. Start with a phrase that captures the reader's attention according to the topic you are dealing with. A phrase that tends to: Start a debate, formulate a strong opinion, tell a truth that nobody accepts, challenge the reader, or tell him something he wants possibly to know based in your topic.
 
-        2.  The content must be clear and readable always, it can also be:
-            Explanatory: Explain something based in your knowledge, in your expertise, a list of tips to the reader, good practices, interesting facts.
-            Divulgatory: Talk about something you read, about something an expert in the field says or about current news in the market that could be interesting for the objective people.
-            Motivational: Talk about your backstory or someone else story that tends to be related to the audience, the people must feel identified
-            Challenging: A post that puts two ideas into perspective and decides for one based on strong opinions and facts.
-            Listicle: Share tools or tips based in the market objective
+def slugify_with_ai(about:str):
+    template="""We need to create a file name based in this text: "{about}"
 
-        3. Invite your audience to leave their opinions on the comments section.
-'''
+    Your task is to return a slug for the text that is
+    consistent and is related to the text itself.
+    
+    We want to use that slug as a filename, it will be used for images and a text file.
+    
+    Avoid further comments, just make your task.
+    Return just the slug itself separated with dashes like:
+    
+    this-will-be-a-slug
+    """
+    agent = SinglePromptAgent(template=template, 
+                              temperature=0)
+    return agent.run(about=about)
 
-social_network = "LinkedIn"
 def main():
+    colored_print("Thinking...")
+    about = "Writting a song about the universe of Harry Potter"
 
-    manager = PostAgent()
-    post = manager.run(post_idea=idea_to_write_about, social_network=social_network, rules=rules)
+    slug = slugify_with_ai(about)
 
-    colored_print(text=post)
-    create_file(filename='post.txt', content=post)
 
-    image_descriptor = PostImageDescriptor()
-    image_description = image_descriptor.run(post=post, colors='just monochrome black and white')
-    generator = ImageGenerator()
-    generator.generate(description=image_description)
+    colored_print(f'Slug: {slug}', "yellow")
+    colored_print(f"I will generate a post about {about}")
 
-    print('---------------------------------------------------------------------------')
-    colored_print('green', image_description)
+    post = generate_post_about(about=about)
+
+    colored_print("Saving post in output directory...")
+    create_file(filename=f'{slug}.md', 
+                content=post)
+
+    colored_print(post, "blue")
+    image_for_post = generate_image_description_for_post(post)
+
+    colored_print(f"Generating image based in the description:\n\n{image_for_post}", "green")
+
+    generator = ImageGenerator(title=slug, 
+                               samples=2)
+    
+    generator.generate(description=image_for_post)
     
 if __name__ == '__main__':
     main()

@@ -5,12 +5,18 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-STABILITY_KEY = os.environ.get('STABILITY_KEY')
-import os
+STABILITY_KEY = os.environ.get('STABILITY_API_KEY')
+
 
 class ImageGenerator:
-    def generate(self, description: str):
-      url = "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v0-9/text-to-image"
+    def __init__(self, title:str="ai_image", samples:int=1):
+        
+        self.title = title
+        self.samples = samples
+
+      
+    def generate(self,description: str):
+      url = "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image"
 
       body = {
         "width": 1024,
@@ -18,7 +24,7 @@ class ImageGenerator:
         "steps": 40,
         "seed": 0,
         "cfg_scale": 7,
-        "samples": 1,
+        "samples": self.samples,
         "style_preset": "enhance",
         "text_prompts": [
           {
@@ -50,5 +56,5 @@ class ImageGenerator:
 
 
       for i, image in enumerate(data["artifacts"]):
-          with open(f"./out/txt2img_{image['seed']}.png", "wb") as f:
+          with open(f"./out/{self.title}-{i}.png", "wb") as f:
               f.write(base64.b64decode(image["base64"]))

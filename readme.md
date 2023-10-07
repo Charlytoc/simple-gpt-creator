@@ -25,6 +25,12 @@ py -m venv venv
 ```python
 pip install -r requirements.txt
 ```
+
+## Copy and add the environment variables
+```
+cp .env.example .env
+```
+
 ## Run the following command
 ```python
 python main.py
